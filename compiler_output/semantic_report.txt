@@ -1,0 +1,38 @@
+==================================================
+    SEMANTIC ANALYSIS REPORT
+==================================================
+Date     : 2026-08-09 07:12:57
+--------------------------------------------------
+
+### PART 1 - PYTHON (Flask) ###
+File   : test_semantic_errors.py
+Status : ❌ Found 10 error(s)
+
+  [1] [SEMANTIC ERROR - REDEFINE_FUNC] Line 7: Function 'calculate' is already defined
+  [2] [SEMANTIC ERROR - WRONG_ARG_COUNT] Line 11: Function 'calculate' expects 2 argument(s) but got 3
+  [3] [SEMANTIC ERROR - MISSING_RETURN] Line 14: Function 'noReturn' does not have a return statement
+  [4] [SEMANTIC ERROR - UNUSED_VAR] Line 15: Variable 'z' is defined but never used
+  [5] [SEMANTIC ERROR - UNUSED_VAR] Line 20: Variable 'unused' is defined but never used
+  [6] [SEMANTIC ERROR - DEAD_CODE] Line 26: Code after return statement is unreachable
+  [7] [SEMANTIC ERROR - UNUSED_VAR] Line 26: Variable 'x' is defined but never used
+  [8] [SEMANTIC ERROR - UNDEFINED_VAR] Line 30: Name 'ghost' is used but not defined
+  [9] [SEMANTIC ERROR - UNDEFINED_FUNC] Line 33: Function 'unknownFunc' is called but not defined
+  [10] [SEMANTIC ERROR - REDEFINE_VAR] Line 38: Variable 'x' is already defined in this scope (first defined at line 37)
+
+### PART 2 - JINJA (Templates) ###
+File   : test_semantic_errors.jinja
+Status : ❌ Found 5 error(s)
+
+  [1] [JINJA SEMANTIC ERROR - UNDEFINED_VARIABLE] Line 9: Variable 'username' is used but not defined in the template context
+  [2] [JINJA SEMANTIC ERROR - UNDEFINED_ITERABLE] Line 12: Cannot loop over 'missing_list': it is not passed from Python
+  [3] [JINJA SEMANTIC ERROR - LOOP_VAR_OUT_OF_SCOPE] Line 17: Loop variable 'item' used outside its {% for %} block
+  [4] [JINJA SEMANTIC ERROR - UNKNOWN_FILTER] Line 20: Unknown filter 'wrongfilter'
+  [5] [JINJA SEMANTIC ERROR - UNDEFINED_FUNCTION] Line 23: Function 'calculate_total' is called but not defined in the template context
+
+--------------------------------------------------
+Python error types (9): UNDEFINED_VAR, UNDEFINED_FUNC,
+  REDEFINE_FUNC, WRONG_ARG_COUNT, MISSING_RETURN,
+  REDEFINE_VAR, UNUSED_VAR, DEAD_CODE, INVALID_ASSIGN
+Jinja error types (5): UNDEFINED_VARIABLE, UNDEFINED_ITERABLE,
+  LOOP_VAR_OUT_OF_SCOPE, UNKNOWN_FILTER, UNDEFINED_FUNCTION
+==================================================

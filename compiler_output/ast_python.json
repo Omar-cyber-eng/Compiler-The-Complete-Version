@@ -1,0 +1,968 @@
+{
+  "type": "PythonFile",
+  "line": 1,
+  "children": [
+    {
+      "type": "Import",
+    "module": "from.flask",
+      "line": 1
+    },
+    {
+      "type": "Assign",
+      "line": 3,
+      "children": [
+        {
+          "type": "Name",
+        "value": "app",
+          "line": 3
+        },
+        {
+          "type": "Call",
+          "line": 3,
+          "children": [
+            {
+              "type": "Name",
+            "value": "Flask",
+              "line": 3
+            },
+            {
+              "type": "Name",
+            "value": "__name__",
+              "line": 3
+            },
+            {
+              "type": "KeywordArg",
+              "line": 3,
+              "children": [
+                {
+                  "type": "Name",
+                "value": "static_folder",
+                  "line": 3
+                },
+                {
+                  "type": "String",
+                "value": "resources",
+                  "line": 3
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Assign",
+      "line": 5,
+      "children": [
+        {
+          "type": "Name",
+        "value": "products",
+          "line": 5
+        },
+        {
+          "type": "List",
+          "line": 5,
+          "children": [
+            {
+              "type": "Dict",
+              "line": 6,
+              "children": [
+                {
+                  "type": "String",
+                "value": "id",
+                  "line": 7
+                },
+                {
+                  "type": "Number",
+                "value": 1,
+                  "line": 7
+                },
+                {
+                  "type": "String",
+                "value": "name",
+                  "line": 8
+                },
+                {
+                  "type": "String",
+                "value": "Laptop",
+                  "line": 8
+                },
+                {
+                  "type": "String",
+                "value": "price",
+                  "line": 9
+                },
+                {
+                  "type": "Number",
+                "value": 1200,
+                  "line": 9
+                },
+                {
+                  "type": "String",
+                "value": "details",
+                  "line": 10
+                },
+                {
+                  "type": "String",
+                "value": "High performance laptop",
+                  "line": 10
+                },
+                {
+                  "type": "String",
+                "value": "image",
+                  "line": 11
+                },
+                {
+                  "type": "String",
+                "value": "images/img.png",
+                  "line": 11
+                }
+              ]
+            },
+            {
+              "type": "Dict",
+              "line": 13,
+              "children": [
+                {
+                  "type": "String",
+                "value": "id",
+                  "line": 14
+                },
+                {
+                  "type": "Number",
+                "value": 2,
+                  "line": 14
+                },
+                {
+                  "type": "String",
+                "value": "name",
+                  "line": 15
+                },
+                {
+                  "type": "String",
+                "value": "Phone",
+                  "line": 15
+                },
+                {
+                  "type": "String",
+                "value": "price",
+                  "line": 16
+                },
+                {
+                  "type": "Number",
+                "value": 800,
+                  "line": 16
+                },
+                {
+                  "type": "String",
+                "value": "details",
+                  "line": 17
+                },
+                {
+                  "type": "String",
+                "value": "Smartphone with great camera",
+                  "line": 17
+                },
+                {
+                  "type": "String",
+                "value": "image",
+                  "line": 18
+                },
+                {
+                  "type": "String",
+                "value": "images/img.png",
+                  "line": 18
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Def",
+    "name": "list_products",
+    "params": [],
+      "line": 22,
+      "children": [
+        {
+          "type": "Decorator",
+        "name": "app.route",
+          "line": 22,
+          "children": [
+            {
+              "type": "Args",
+              "line": 22,
+              "children": [
+                {
+                  "type": "String",
+                "value": "/products",
+                  "line": 22
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Suite",
+          "line": 23,
+          "children": [
+            {
+              "type": "Return",
+              "line": 24,
+              "children": [
+                {
+                  "type": "Call",
+                  "line": 24,
+                  "children": [
+                    {
+                      "type": "Name",
+                    "value": "render_template",
+                      "line": 24
+                    },
+                    {
+                      "type": "String",
+                    "value": "list_products.jinja",
+                      "line": 24
+                    },
+                    {
+                      "type": "KeywordArg",
+                      "line": 24,
+                      "children": [
+                        {
+                          "type": "Name",
+                        "value": "products",
+                          "line": 24
+                        },
+                        {
+                          "type": "Name",
+                        "value": "products",
+                          "line": 24
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Def",
+    "name": "product_detail",
+    "params": ["pid"],
+      "line": 26,
+      "children": [
+        {
+          "type": "Decorator",
+        "name": "app.route",
+          "line": 26,
+          "children": [
+            {
+              "type": "Args",
+              "line": 26,
+              "children": [
+                {
+                  "type": "String",
+                "value": "/products/<int:pid>",
+                  "line": 26
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Suite",
+          "line": 27,
+          "children": [
+            {
+              "type": "Assign",
+              "line": 28,
+              "children": [
+                {
+                  "type": "Name",
+                "value": "product",
+                  "line": 28
+                },
+                {
+                  "type": "Call",
+                  "line": 28,
+                  "children": [
+                    {
+                      "type": "Name",
+                    "value": "next",
+                      "line": 28
+                    },
+                    {
+                      "type": "GeneratorExpr",
+                      "line": 28,
+                      "children": [
+                        {
+                          "type": "Name",
+                        "value": "p",
+                          "line": 28
+                        },
+                        {
+                          "type": "CompFor",
+                          "line": 28,
+                          "children": [
+                            {
+                              "type": "Name",
+                            "value": "p",
+                              "line": 28
+                            },
+                            {
+                              "type": "Name",
+                            "value": "products",
+                              "line": 28
+                            },
+                            {
+                              "type": "BinOp",
+                            "op": "==",
+                              "line": 28,
+                              "children": [
+                                {
+                                  "type": "Subscript",
+                                  "line": 28,
+                                  "children": [
+                                    {
+                                      "type": "Name",
+                                    "value": "p",
+                                      "line": 28
+                                    },
+                                    {
+                                      "type": "String",
+                                    "value": "id",
+                                      "line": 28
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "Name",
+                                "value": "pid",
+                                  "line": 28
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Return",
+              "line": 29,
+              "children": [
+                {
+                  "type": "Call",
+                  "line": 29,
+                  "children": [
+                    {
+                      "type": "Name",
+                    "value": "render_template",
+                      "line": 29
+                    },
+                    {
+                      "type": "String",
+                    "value": "product_detail.jinja",
+                      "line": 29
+                    },
+                    {
+                      "type": "KeywordArg",
+                      "line": 29,
+                      "children": [
+                        {
+                          "type": "Name",
+                        "value": "product",
+                          "line": 29
+                        },
+                        {
+                          "type": "Name",
+                        "value": "product",
+                          "line": 29
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Def",
+    "name": "add_product",
+    "params": [],
+      "line": 31,
+      "children": [
+        {
+          "type": "Decorator",
+        "name": "app.route",
+          "line": 31,
+          "children": [
+            {
+              "type": "Args",
+              "line": 31,
+              "children": [
+                {
+                  "type": "String",
+                "value": "/add",
+                  "line": 31
+                },
+                {
+                  "type": "KeywordArg",
+                  "line": 31,
+                  "children": [
+                    {
+                      "type": "Name",
+                    "value": "methods",
+                      "line": 31
+                    },
+                    {
+                      "type": "List",
+                      "line": 31,
+                      "children": [
+                        {
+                          "type": "String",
+                        "value": "GET",
+                          "line": 31
+                        },
+                        {
+                          "type": "String",
+                        "value": "POST",
+                          "line": 31
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Suite",
+          "line": 32,
+          "children": [
+            {
+              "type": "If",
+              "line": 33,
+              "children": [
+                {
+                  "type": "BinOp",
+                "op": "==",
+                  "line": 33,
+                  "children": [
+                    {
+                      "type": "AttrAccess",
+                      "line": 33,
+                      "children": [
+                        {
+                          "type": "Name",
+                        "value": "request",
+                          "line": 33
+                        },
+                        {
+                          "type": "Name",
+                        "value": "method",
+                          "line": 33
+                        }
+                      ]
+                    },
+                    {
+                      "type": "String",
+                    "value": "POST",
+                      "line": 33
+                    }
+                  ]
+                },
+                {
+                  "type": "Suite",
+                  "line": 33,
+                  "children": [
+                    {
+                      "type": "Assign",
+                      "line": 34,
+                      "children": [
+                        {
+                          "type": "Name",
+                        "value": "new_product",
+                          "line": 34
+                        },
+                        {
+                          "type": "Dict",
+                          "line": 34,
+                          "children": [
+                            {
+                              "type": "String",
+                            "value": "id",
+                              "line": 35
+                            },
+                            {
+                              "type": "BinOp",
+                            "op": "+",
+                              "line": 35,
+                              "children": [
+                                {
+                                  "type": "Call",
+                                  "line": 35,
+                                  "children": [
+                                    {
+                                      "type": "Name",
+                                    "value": "len",
+                                      "line": 35
+                                    },
+                                    {
+                                      "type": "Name",
+                                    "value": "products",
+                                      "line": 35
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "Number",
+                                "value": 1,
+                                  "line": 35
+                                }
+                              ]
+                            },
+                            {
+                              "type": "String",
+                            "value": "name",
+                              "line": 36
+                            },
+                            {
+                              "type": "Subscript",
+                              "line": 36,
+                              "children": [
+                                {
+                                  "type": "AttrAccess",
+                                  "line": 36,
+                                  "children": [
+                                    {
+                                      "type": "Name",
+                                    "value": "request",
+                                      "line": 36
+                                    },
+                                    {
+                                      "type": "Name",
+                                    "value": "form",
+                                      "line": 36
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "String",
+                                "value": "name",
+                                  "line": 36
+                                }
+                              ]
+                            },
+                            {
+                              "type": "String",
+                            "value": "price",
+                              "line": 37
+                            },
+                            {
+                              "type": "Subscript",
+                              "line": 37,
+                              "children": [
+                                {
+                                  "type": "AttrAccess",
+                                  "line": 37,
+                                  "children": [
+                                    {
+                                      "type": "Name",
+                                    "value": "request",
+                                      "line": 37
+                                    },
+                                    {
+                                      "type": "Name",
+                                    "value": "form",
+                                      "line": 37
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "String",
+                                "value": "price",
+                                  "line": 37
+                                }
+                              ]
+                            },
+                            {
+                              "type": "String",
+                            "value": "details",
+                              "line": 38
+                            },
+                            {
+                              "type": "Subscript",
+                              "line": 38,
+                              "children": [
+                                {
+                                  "type": "AttrAccess",
+                                  "line": 38,
+                                  "children": [
+                                    {
+                                      "type": "Name",
+                                    "value": "request",
+                                      "line": 38
+                                    },
+                                    {
+                                      "type": "Name",
+                                    "value": "form",
+                                      "line": 38
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "String",
+                                "value": "details",
+                                  "line": 38
+                                }
+                              ]
+                            },
+                            {
+                              "type": "String",
+                            "value": "image",
+                              "line": 39
+                            },
+                            {
+                              "type": "String",
+                            "value": "images/img.png",
+                              "line": 39
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Call",
+                      "line": 41,
+                      "children": [
+                        {
+                          "type": "AttrAccess",
+                          "line": 41,
+                          "children": [
+                            {
+                              "type": "Name",
+                            "value": "products",
+                              "line": 41
+                            },
+                            {
+                              "type": "Name",
+                            "value": "append",
+                              "line": 41
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Name",
+                        "value": "new_product",
+                          "line": 41
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Return",
+                      "line": 42,
+                      "children": [
+                        {
+                          "type": "Call",
+                          "line": 42,
+                          "children": [
+                            {
+                              "type": "Name",
+                            "value": "redirect",
+                              "line": 42
+                            },
+                            {
+                              "type": "Call",
+                              "line": 42,
+                              "children": [
+                                {
+                                  "type": "Name",
+                                "value": "url_for",
+                                  "line": 42
+                                },
+                                {
+                                  "type": "String",
+                                "value": "list_products",
+                                  "line": 42
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Return",
+              "line": 43,
+              "children": [
+                {
+                  "type": "Call",
+                  "line": 43,
+                  "children": [
+                    {
+                      "type": "Name",
+                    "value": "render_template",
+                      "line": 43
+                    },
+                    {
+                      "type": "String",
+                    "value": "add_product.jinja",
+                      "line": 43
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Def",
+    "name": "delete_product",
+    "params": ["pid"],
+      "line": 45,
+      "children": [
+        {
+          "type": "Decorator",
+        "name": "app.route",
+          "line": 45,
+          "children": [
+            {
+              "type": "Args",
+              "line": 45,
+              "children": [
+                {
+                  "type": "String",
+                "value": "/delete/<int:pid>",
+                  "line": 45
+                },
+                {
+                  "type": "KeywordArg",
+                  "line": 45,
+                  "children": [
+                    {
+                      "type": "Name",
+                    "value": "methods",
+                      "line": 45
+                    },
+                    {
+                      "type": "List",
+                      "line": 45,
+                      "children": [
+                        {
+                          "type": "String",
+                        "value": "POST",
+                          "line": 45
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Suite",
+          "line": 46,
+          "children": [
+            {
+              "type": "Global",
+              "line": 47,
+              "children": [
+                {
+                  "type": "Name",
+                "value": "products",
+                  "line": 47
+                }
+              ]
+            },
+            {
+              "type": "Assign",
+              "line": 48,
+              "children": [
+                {
+                  "type": "Name",
+                "value": "products",
+                  "line": 48
+                },
+                {
+                  "type": "ListComp",
+                  "line": 48,
+                  "children": [
+                    {
+                      "type": "Name",
+                    "value": "p",
+                      "line": 48
+                    },
+                    {
+                      "type": "CompFor",
+                      "line": 48,
+                      "children": [
+                        {
+                          "type": "Name",
+                        "value": "p",
+                          "line": 48
+                        },
+                        {
+                          "type": "Name",
+                        "value": "products",
+                          "line": 48
+                        },
+                        {
+                          "type": "BinOp",
+                        "op": "!=",
+                          "line": 48,
+                          "children": [
+                            {
+                              "type": "Subscript",
+                              "line": 48,
+                              "children": [
+                                {
+                                  "type": "Name",
+                                "value": "p",
+                                  "line": 48
+                                },
+                                {
+                                  "type": "String",
+                                "value": "id",
+                                  "line": 48
+                                }
+                              ]
+                            },
+                            {
+                              "type": "Name",
+                            "value": "pid",
+                              "line": 48
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Return",
+              "line": 49,
+              "children": [
+                {
+                  "type": "Call",
+                  "line": 49,
+                  "children": [
+                    {
+                      "type": "Name",
+                    "value": "redirect",
+                      "line": 49
+                    },
+                    {
+                      "type": "Call",
+                      "line": 49,
+                      "children": [
+                        {
+                          "type": "Name",
+                        "value": "url_for",
+                          "line": 49
+                        },
+                        {
+                          "type": "String",
+                        "value": "list_products",
+                          "line": 49
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "If",
+      "line": 51,
+      "children": [
+        {
+          "type": "BinOp",
+        "op": "==",
+          "line": 51,
+          "children": [
+            {
+              "type": "Name",
+            "value": "__name__",
+              "line": 51
+            },
+            {
+              "type": "String",
+            "value": "__main__",
+              "line": 51
+            }
+          ]
+        },
+        {
+          "type": "Suite",
+          "line": 51,
+          "children": [
+            {
+              "type": "Call",
+              "line": 52,
+              "children": [
+                {
+                  "type": "AttrAccess",
+                  "line": 52,
+                  "children": [
+                    {
+                      "type": "Name",
+                    "value": "app",
+                      "line": 52
+                    },
+                    {
+                      "type": "Name",
+                    "value": "run",
+                      "line": 52
+                    }
+                  ]
+                },
+                {
+                  "type": "KeywordArg",
+                  "line": 52,
+                  "children": [
+                    {
+                      "type": "Name",
+                    "value": "debug",
+                      "line": 52
+                    },
+                    {
+                      "type": "Name",
+                    "value": "True",
+                      "line": 52
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

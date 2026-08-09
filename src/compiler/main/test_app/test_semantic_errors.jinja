@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jinja Semantic Errors Demo</title>
+</head>
+<body>
+
+<!-- (1) UNDEFINED_VARIABLE: username لم يُمرَّر من Python -->
+<h1>{{ username }}</h1>
+
+<!-- (2) UNDEFINED_ITERABLE: missing_list غير معرّف -->
+{% for item in missing_list %}
+    <p>{{ item }}</p>
+{% endfor %}
+
+<!-- (3) LOOP_VAR_OUT_OF_SCOPE: item مستخدم خارج حلقة for -->
+<p>{{ item }}</p>
+
+<!-- (4) UNKNOWN_FILTER: wrongfilter فلتر غير معروف (products معرّف) -->
+<p>{{ products | wrongfilter }}</p>
+
+<!-- (5) UNDEFINED_FUNCTION: calculate_total دالة غير معروفة -->
+<p>{{ calculate_total() }}</p>
+
+</body>
+</html>

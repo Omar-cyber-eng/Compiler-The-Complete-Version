@@ -1,0 +1,368 @@
+from flask import Flask, render_template, request, redirect, url_for
+
+app = Flask(__name__, static_folder="resources")
+
+products = [
+    {
+        "id": 1,
+        "name": "Laptop",
+        "price": 1200,
+        "details": "High performance laptop",
+        "image": "images/img.png"
+    },
+    {
+        "id": 2,
+        "name": "Phone",
+        "price": 800,
+        "details": "Smartphone with great camera",
+        "image": "images/img.png"
+    }
+]
+
+@app.route("/products")
+def list_products():
+    return render_template("list_products.jinja", products=products)
+
+@app.route("/products/<int:pid>")
+def product_detail(pid):
+    product = next(p for p in products if p["id"] == pid)
+    return render_template("product_detail.jinja", product=product)
+
+@app.route("/add", methods=["GET", "POST"])
+def add_product():
+    if request.method == "POST":
+        new_product = {
+            "id": len(products) + 1,
+            "name": request.form["name"],
+            "price": request.form["price"],
+            "details": request.form["details"],
+            "image": "images/img.png"
+        }
+        products.append(new_product)
+        return redirect(url_for("list_products"))
+    return render_template("add_product.jinja")
+
+@app.route("/delete/<int:pid>", methods=["POST"])
+def delete_product(pid):
+    global products
+    products = [p for p in products if p["id"] != pid]
+    return redirect(url_for("list_products"))
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
+
+PS D:\Template-Compiler-main>  d:; cd 'd:\Template-Compiler-main'; & 'C:\Program Files\Java\jdk-25\bin\java.exe' '@C:\Users\DELL\AppData\Local\Temp\cp_a3bry0k02u18o6jste6e2g86z.argfile' 'compiler.main.TestMain' 
+================================================================================
+PARSING PYTHON FILE: app.py
+================================================================================
+
+--- PYTHON AST ---
+
+PythonFile (line 1)
+  Import "from.flask" (line 1)
+  Assign (line 3)
+    Name "app" (line 3)
+    Call (line 3)
+      Name "Flask" (line 3)
+      Name "__name__" (line 3)
+  Assign (line 5)
+    Name "products" (line 5)
+    List (line 5)
+      Dict (line 6)
+      Dict (line 13)
+  Def "list_products" params=[] (line 22)
+    Decorator "app.route" (line 22)
+    Suite (line 23)
+      Return (line 24)
+        Call (line 24)
+          Name "render_template" (line 24)
+          String "list_products.jinja" (line 24)
+  Def "product_detail" params=[pid] (line 26)
+    Decorator "app.route" (line 26)
+    Suite (line 27)
+      Assign (line 28)
+        Name "product" (line 28)
+        Call (line 28)
+          Name "next" (line 28)
+      Return (line 29)
+        Call (line 29)
+          Name "render_template" (line 29)
+          String "product_detail.jinja" (line 29)
+  Def "add_product" params=[] (line 31)
+    Decorator "app.route" (line 31)
+    Suite (line 32)
+      If (line 33)
+        BinOp op="==" (line 33)
+          AttrAccess (line 33)
+            Name "request" (line 33)
+            Name "method" (line 33)
+          String "POST" (line 33)
+        Suite (line 33)
+          Assign (line 34)
+            Name "new_product" (line 34)
+            Dict (line 34)
+          Call (line 41)
+            AttrAccess (line 41)
+              Name "products" (line 41)
+              Name "append" (line 41)
+            Name "new_product" (line 41)
+          Return (line 42)
+            Call (line 42)
+              Name "redirect" (line 42)
+              Call (line 42)
+                Name "url_for" (line 42)
+                String "list_products" (line 42)
+      Return (line 43)
+        Call (line 43)
+          Name "render_template" (line 43)
+          String "add_product.jinja" (line 43)
+  Def "delete_product" params=[pid] (line 45)
+    Decorator "app.route" (line 45)
+    Suite (line 46)
+      Global (line 47)
+        Name "products" (line 47)
+      Assign (line 48)
+        Name "products" (line 48)
+      Return (line 49)
+        Call (line 49)
+          Name "redirect" (line 49)
+          Call (line 49)
+            Name "url_for" (line 49)
+            String "list_products" (line 49)
+  If (line 51)
+    BinOp op="==" (line 51)
+      Name "__name__" (line 51)
+      String "__main__" (line 51)
+    Suite (line 51)
+      Call (line 52)
+        AttrAccess (line 52)
+          Name "app" (line 52)
+          Name "run" (line 52)
+
+--- SYMBOL TABLE ---
+
+Scope: global
+Symbols:
+  from.flask: import (line 1)
+  app: variable (line 3)
+  products: global_variable (line 47)
+  list_products: function (line 22)
+  product_detail: function (line 26)
+  add_product: function (line 31)
+  delete_product: function (line 45)
+
+  Scope: list_products
+
+  Scope: product_detail
+  Symbols:
+    pid: parameter (line 26)
+    product: variable (line 28)
+
+  Scope: add_product
+  Symbols:
+    new_product: variable (line 34)
+
+  Scope: delete_product
+  Symbols:
+    pid: parameter (line 45)
+    products: variable (line 48)
+
+
+================================================================================
+PARSING TEMPLATE: list_products.jinja
+================================================================================
+
+--- TEMPLATE AST ---
+
+Template (line 1)
+  Text (line 1) "<!DOCTYPE html>"
+  Text (line 1) ""
+  HtmlElement <html> (line 2)
+    Text (line 2) ""
+    HtmlElement <head> (line 3)
+      Text (line 3) ""
+      HtmlElement <title> (line 4)
+        Text (line 4) "Products"
+        Text (line 4) ""
+        HtmlElement <link> (line 5) attrs=[rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" ]
+          Text (line 5) ""
+          Text (line 6) ""
+          HtmlElement <body> (line 7)
+            Text (line 7) ""
+            Text (line 9) "Products"
+          Text (line 9) ""
+          Text (line 11) ""
+          JinjaStmt (line 12)
+            Name "product" (line 12)
+            Name "products" (line 12)
+            Text (line 12) ""
+            HtmlElement <li> (line 13)
+              Text (line 13) ""
+              HtmlElement <img> (line 14) attrs=[src="{{ url_for('static', filename=product.image) }}" width="100" ]
+                Text (line 14) ""
+                HtmlElement <a> (line 15) attrs=[href="/products/{{ product.id }}" ]
+                  Text (line 15) ""
+                  JinjaExpr (line 16)
+                    AttrAccess (line 16)
+                      Name "product" (line 16)
+                      Name "name" (line 16)
+                  Text (line 16) ""
+                  Text (line 17) "-"
+                  JinjaExpr (line 18)
+                    AttrAccess (line 18)
+                      Name "product" (line 18)
+                      Name "price" (line 18)
+                  Text (line 18) "$"
+                  Text (line 20) ""
+                  Text (line 21) ""
+                  Text (line 22) "Delete"
+                Text (line 22) ""
+              Text (line 23) ""
+            Text (line 24) ""
+          Text (line 25) ""
+        Text (line 26) ""
+        Text (line 28) "Add Product"
+      Text (line 28) ""
+    Text (line 30) ""
+  Text (line 31) ""
+
+
+================================================================================
+PARSING TEMPLATE: add_product.jinja
+================================================================================
+
+--- TEMPLATE AST ---
+
+Template (line 1)
+  Text (line 1) "<!DOCTYPE html>"
+  Text (line 1) ""
+  HtmlElement <html> (line 2)
+    Text (line 2) ""
+    HtmlElement <head> (line 3)
+      Text (line 3) ""
+      HtmlElement <title> (line 4)
+        Text (line 4) "Add Product"
+        Text (line 4) ""
+        HtmlElement <link> (line 5) attrs=[rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" ]
+          Text (line 5) ""
+          Text (line 6) ""
+          HtmlElement <body> (line 7)
+            Text (line 7) ""
+            HtmlElement <h1> (line 9)
+              Text (line 9) "Add Product"
+              Text (line 9) ""
+              HtmlElement <form> (line 11) attrs=[method="post" ]
+                Text (line 11) ""
+                HtmlElement <label> (line 12)
+                  Text (line 12) "Name:"
+                  Text (line 12) ""
+                  Text (line 13) ""
+                  Text (line 15) "Price:"
+                Text (line 15) ""
+                Text (line 16) ""
+                Text (line 18) "Details:"
+              Text (line 18) ""
+            Text (line 19) ""
+            Text (line 21) "Add"
+          Text (line 21) ""
+        Text (line 22) ""
+        Text (line 24) "Back to products"
+      Text (line 24) ""
+    Text (line 26) ""
+  Text (line 27) ""
+
+
+================================================================================
+PARSING TEMPLATE: product_detail.jinja
+================================================================================
+
+--- TEMPLATE AST ---
+
+Template (line 1)
+  Text (line 1) "<!DOCTYPE html>"
+  Text (line 1) ""
+  HtmlElement <html> (line 2)
+    Text (line 2) ""
+    HtmlElement <head> (line 3)
+      Text (line 3) ""
+      HtmlElement <title> (line 4)
+        Text (line 4) "Product Details"
+        Text (line 4) ""
+        HtmlElement <link> (line 5) attrs=[rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" ]
+          Text (line 5) ""
+          Text (line 6) ""
+          HtmlElement <body> (line 7)
+            Text (line 7) ""
+            HtmlElement <h1> (line 9)
+              JinjaExpr (line 9)
+                AttrAccess (line 9)
+                  Name "product" (line 9)
+                  Name "name" (line 9)
+            Text (line 9) ""
+            Text (line 11) ""
+            Text (line 13) "Price:"
+            JinjaExpr (line 13)
+              AttrAccess (line 13)
+                Name "product" (line 13)
+                Name "price" (line 13)
+            Text (line 13) "$"
+          Text (line 13) ""
+          JinjaExpr (line 14)
+            AttrAccess (line 14)
+              Name "product" (line 14)
+              Name "details" (line 14)
+        Text (line 14) ""
+        Text (line 16) "Back to products"
+      Text (line 16) ""
+    Text (line 18) ""
+  Text (line 19) ""
+
+
+================================================================================
+PARSING CSS FILE: style.css
+================================================================================
+
+--- CSS AST ---
+
+CssStylesheet (line 1)
+  CssRule selector="body" (line 1)
+    CssDeclaration font-family: Arial , sans-serif (line 2)
+    CssDeclaration margin: 20px (line 3)
+  CssRule selector="h1" (line 6)
+    CssDeclaration color: #2c3e50 (line 7)
+  CssRule selector="ul" (line 10)
+    CssDeclaration list-style: none (line 11)
+    CssDeclaration padding: 0 (line 12)
+  CssRule selector="li" (line 15)
+    CssDeclaration margin: 10px 0 (line 16)
+    CssDeclaration padding: 5px (line 17)
+    CssDeclaration border: 1px solid #ddd (line 18)
+    CssDeclaration border-radius: 5px (line 19)
+  CssRule selector="img" (line 22)
+    CssDeclaration vertical-align: middle (line 23)
+    CssDeclaration margin-right: 10px (line 24)
+  CssRule selector="a" (line 27)
+    CssDeclaration text-decoration: none (line 28)
+    CssDeclaration color: #2980b9 (line 29)
+  CssRule selector="a:hover" (line 32)
+    CssDeclaration color: #e74c3c (line 33)
+  CssRule selector="form input, form textarea" (line 36)
+    CssDeclaration display: block (line 37)
+    CssDeclaration margin: 5px 0 10px 0 (line 38)
+    CssDeclaration padding: 5px (line 39)
+  CssRule selector="button" (line 42)
+    CssDeclaration margin-left: 10px (line 43)
+    CssDeclaration background-color: #e74c3c (line 44)
+    CssDeclaration color: white (line 45)
+    CssDeclaration border: none (line 46)
+    CssDeclaration padding: 3px 8px (line 47)
+    CssDeclaration border-radius: 3px (line 48)
+    CssDeclaration cursor: pointer (line 49)
+  CssRule selector="button:hover" (line 52)
+    CssDeclaration background-color: #c0392b (line 53)
+
+
+================================================================================
+ALL FILES PARSED SUCCESSFULLY!
+================================================================================

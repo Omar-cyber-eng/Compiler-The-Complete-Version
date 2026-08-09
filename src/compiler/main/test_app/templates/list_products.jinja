@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Products</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<h1>Products</h1>
+
+<ul>
+{% for product in products %}
+    <li>
+        <img src="{{ url_for('static', filename=product.image) }}" width="100">
+        <a href="/products/{{ product.id }}">
+            {{ product.name }}
+        </a>
+        - {{ product.price }} $
+
+        <!-- زر حذف -->
+        <form action="/delete/{{ product.id }}" method="post" style="display:inline;">
+            <button type="submit">Delete</button>
+        </form>
+    </li>
+{% endfor %}
+</ul>
+
+<a href="/add">Add Product</a>
+
+</body>
+</html>
