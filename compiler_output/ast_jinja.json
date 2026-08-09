@@ -1,0 +1,771 @@
+{
+  "type": "JinjaTemplates",
+  "generated": "2026-08-09 07:12:57",
+  "templates": {
+    "list_products.jinja": {
+      "type": "Template",
+      "line": 1,
+      "children": [
+        {
+          "type": "Text",
+        "value": "<!DOCTYPE html>",
+          "line": 1
+        },
+        {
+          "type": "HtmlElement",
+        "tag": "html",
+          "line": 2,
+          "children": [
+            {
+              "type": "HtmlElement",
+            "tag": "head",
+              "line": 3,
+              "children": [
+                {
+                  "type": "HtmlElement",
+                "tag": "title",
+                  "line": 4,
+                  "children": [
+                    {
+                      "type": "Text",
+                    "value": "Products",
+                      "line": 4
+                    }
+                  ]
+                },
+                {
+                  "type": "HtmlElement",
+                "tag": "link",
+                "attributes": {
+                  "rel": "stylesheet",
+                  "href": "{{...}}"
+                },
+                  "line": 5,
+                  "children": [
+                    {
+                      "type": "Call",
+                      "line": 5,
+                      "children": [
+                        {
+                          "type": "Name",
+                        "value": "url_for",
+                          "line": 5
+                        },
+                        {
+                          "type": "String",
+                        "value": "static",
+                          "line": 5
+                        },
+                        {
+                          "type": "KwArg:filename",
+                          "line": 5,
+                          "children": [
+                            {
+                              "type": "String",
+                            "value": "css/style.css",
+                              "line": 5
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "HtmlElement",
+            "tag": "body",
+              "line": 7,
+              "children": [
+                {
+                  "type": "HtmlElement",
+                "tag": "h1",
+                  "line": 9,
+                  "children": [
+                    {
+                      "type": "Text",
+                    "value": "Products",
+                      "line": 9
+                    }
+                  ]
+                },
+                {
+                  "type": "HtmlElement",
+                "tag": "ul",
+                  "line": 11,
+                  "children": [
+                    {
+                      "type": "JinjaStmt",
+                      "line": 12,
+                      "children": [
+                        {
+                          "type": "Name",
+                        "value": "product",
+                          "line": 12
+                        },
+                        {
+                          "type": "Name",
+                        "value": "products",
+                          "line": 12
+                        },
+                        {
+                          "type": "HtmlElement",
+                        "tag": "li",
+                          "line": 13,
+                          "children": [
+                            {
+                              "type": "HtmlElement",
+                            "tag": "img",
+                            "attributes": {
+                              "src": "{{...}}",
+                              "width": "100"
+                            },
+                              "line": 14,
+                              "children": [
+                                {
+                                  "type": "Call",
+                                  "line": 14,
+                                  "children": [
+                                    {
+                                      "type": "Name",
+                                    "value": "url_for",
+                                      "line": 14
+                                    },
+                                    {
+                                      "type": "String",
+                                    "value": "static",
+                                      "line": 14
+                                    },
+                                    {
+                                      "type": "KwArg:filename",
+                                      "line": 14,
+                                      "children": [
+                                        {
+                                          "type": "AttrAccess",
+                                          "line": 14,
+                                          "children": [
+                                            {
+                                              "type": "Name",
+                                            "value": "product",
+                                              "line": 14
+                                            },
+                                            {
+                                              "type": "Name",
+                                            "value": "image",
+                                              "line": 14
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "HtmlElement",
+                            "tag": "a",
+                            "attributes": {
+                              "href": "/products/{{...}}"
+                            },
+                              "line": 15,
+                              "children": [
+                                {
+                                  "type": "AttrAccess",
+                                  "line": 15,
+                                  "children": [
+                                    {
+                                      "type": "Name",
+                                    "value": "product",
+                                      "line": 15
+                                    },
+                                    {
+                                      "type": "Name",
+                                    "value": "id",
+                                      "line": 15
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "JinjaExpr",
+                                  "line": 16,
+                                  "children": [
+                                    {
+                                      "type": "AttrAccess",
+                                      "line": 16,
+                                      "children": [
+                                        {
+                                          "type": "Name",
+                                        "value": "product",
+                                          "line": 16
+                                        },
+                                        {
+                                          "type": "Name",
+                                        "value": "name",
+                                          "line": 16
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "Text",
+                            "value": "-",
+                              "line": 17
+                            },
+                            {
+                              "type": "JinjaExpr",
+                              "line": 18,
+                              "children": [
+                                {
+                                  "type": "AttrAccess",
+                                  "line": 18,
+                                  "children": [
+                                    {
+                                      "type": "Name",
+                                    "value": "product",
+                                      "line": 18
+                                    },
+                                    {
+                                      "type": "Name",
+                                    "value": "price",
+                                      "line": 18
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "Text",
+                            "value": "$",
+                              "line": 18
+                            },
+                            {
+                              "type": "HtmlElement",
+                            "tag": "form",
+                            "attributes": {
+                              "method": "post",
+                              "action": "/delete/{{...}}",
+                              "style": "display:inline;"
+                            },
+                              "line": 21,
+                              "children": [
+                                {
+                                  "type": "AttrAccess",
+                                  "line": 21,
+                                  "children": [
+                                    {
+                                      "type": "Name",
+                                    "value": "product",
+                                      "line": 21
+                                    },
+                                    {
+                                      "type": "Name",
+                                    "value": "id",
+                                      "line": 21
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "HtmlElement",
+                                "tag": "button",
+                                "attributes": {
+                                  "type": "submit"
+                                },
+                                  "line": 22,
+                                  "children": [
+                                    {
+                                      "type": "Text",
+                                    "value": "Delete",
+                                      "line": 22
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "HtmlElement",
+                "tag": "a",
+                "attributes": {
+                  "href": "/add"
+                },
+                  "line": 28,
+                  "children": [
+                    {
+                      "type": "Text",
+                    "value": "Add Product",
+                      "line": 28
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "add_product.jinja": {
+      "type": "Template",
+      "line": 1,
+      "children": [
+        {
+          "type": "Text",
+        "value": "<!DOCTYPE html>",
+          "line": 1
+        },
+        {
+          "type": "HtmlElement",
+        "tag": "html",
+          "line": 2,
+          "children": [
+            {
+              "type": "HtmlElement",
+            "tag": "head",
+              "line": 3,
+              "children": [
+                {
+                  "type": "HtmlElement",
+                "tag": "title",
+                  "line": 4,
+                  "children": [
+                    {
+                      "type": "Text",
+                    "value": "Add Product",
+                      "line": 4
+                    }
+                  ]
+                },
+                {
+                  "type": "HtmlElement",
+                "tag": "link",
+                "attributes": {
+                  "rel": "stylesheet",
+                  "href": "{{...}}"
+                },
+                  "line": 5,
+                  "children": [
+                    {
+                      "type": "Call",
+                      "line": 5,
+                      "children": [
+                        {
+                          "type": "Name",
+                        "value": "url_for",
+                          "line": 5
+                        },
+                        {
+                          "type": "String",
+                        "value": "static",
+                          "line": 5
+                        },
+                        {
+                          "type": "KwArg:filename",
+                          "line": 5,
+                          "children": [
+                            {
+                              "type": "String",
+                            "value": "css/style.css",
+                              "line": 5
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "HtmlElement",
+            "tag": "body",
+              "line": 7,
+              "children": [
+                {
+                  "type": "HtmlElement",
+                "tag": "h1",
+                  "line": 9,
+                  "children": [
+                    {
+                      "type": "Text",
+                    "value": "Add Product",
+                      "line": 9
+                    }
+                  ]
+                },
+                {
+                  "type": "HtmlElement",
+                "tag": "form",
+                "attributes": {
+                  "method": "post"
+                },
+                  "line": 11,
+                  "children": [
+                    {
+                      "type": "HtmlElement",
+                    "tag": "label",
+                      "line": 12,
+                      "children": [
+                        {
+                          "type": "Text",
+                        "value": "Name:",
+                          "line": 12
+                        }
+                      ]
+                    },
+                    {
+                      "type": "HtmlElement",
+                    "tag": "input",
+                    "attributes": {
+                      "name": "name",
+                      "type": "text"
+                    },
+                      "line": 13
+                    },
+                    {
+                      "type": "HtmlElement",
+                    "tag": "br",
+                      "line": 13
+                    },
+                    {
+                      "type": "HtmlElement",
+                    "tag": "label",
+                      "line": 15,
+                      "children": [
+                        {
+                          "type": "Text",
+                        "value": "Price:",
+                          "line": 15
+                        }
+                      ]
+                    },
+                    {
+                      "type": "HtmlElement",
+                    "tag": "input",
+                    "attributes": {
+                      "name": "price",
+                      "type": "number"
+                    },
+                      "line": 16
+                    },
+                    {
+                      "type": "HtmlElement",
+                    "tag": "br",
+                      "line": 16
+                    },
+                    {
+                      "type": "HtmlElement",
+                    "tag": "label",
+                      "line": 18,
+                      "children": [
+                        {
+                          "type": "Text",
+                        "value": "Details:",
+                          "line": 18
+                        }
+                      ]
+                    },
+                    {
+                      "type": "HtmlElement",
+                    "tag": "textarea",
+                    "attributes": {
+                      "name": "details"
+                    },
+                      "line": 19
+                    },
+                    {
+                      "type": "HtmlElement",
+                    "tag": "br",
+                      "line": 19
+                    },
+                    {
+                      "type": "HtmlElement",
+                    "tag": "button",
+                    "attributes": {
+                      "type": "submit"
+                    },
+                      "line": 21,
+                      "children": [
+                        {
+                          "type": "Text",
+                        "value": "Add",
+                          "line": 21
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "HtmlElement",
+                "tag": "a",
+                "attributes": {
+                  "href": "/products"
+                },
+                  "line": 24,
+                  "children": [
+                    {
+                      "type": "Text",
+                    "value": "Back to products",
+                      "line": 24
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "product_detail.jinja": {
+      "type": "Template",
+      "line": 1,
+      "children": [
+        {
+          "type": "Text",
+        "value": "<!DOCTYPE html>",
+          "line": 1
+        },
+        {
+          "type": "HtmlElement",
+        "tag": "html",
+          "line": 2,
+          "children": [
+            {
+              "type": "HtmlElement",
+            "tag": "head",
+              "line": 3,
+              "children": [
+                {
+                  "type": "HtmlElement",
+                "tag": "title",
+                  "line": 4,
+                  "children": [
+                    {
+                      "type": "Text",
+                    "value": "Product Details",
+                      "line": 4
+                    }
+                  ]
+                },
+                {
+                  "type": "HtmlElement",
+                "tag": "link",
+                "attributes": {
+                  "rel": "stylesheet",
+                  "href": "{{...}}"
+                },
+                  "line": 5,
+                  "children": [
+                    {
+                      "type": "Call",
+                      "line": 5,
+                      "children": [
+                        {
+                          "type": "Name",
+                        "value": "url_for",
+                          "line": 5
+                        },
+                        {
+                          "type": "String",
+                        "value": "static",
+                          "line": 5
+                        },
+                        {
+                          "type": "KwArg:filename",
+                          "line": 5,
+                          "children": [
+                            {
+                              "type": "String",
+                            "value": "css/style.css",
+                              "line": 5
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "HtmlElement",
+            "tag": "body",
+              "line": 7,
+              "children": [
+                {
+                  "type": "HtmlElement",
+                "tag": "h1",
+                  "line": 9,
+                  "children": [
+                    {
+                      "type": "JinjaExpr",
+                      "line": 9,
+                      "children": [
+                        {
+                          "type": "AttrAccess",
+                          "line": 9,
+                          "children": [
+                            {
+                              "type": "Name",
+                            "value": "product",
+                              "line": 9
+                            },
+                            {
+                              "type": "Name",
+                            "value": "name",
+                              "line": 9
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "HtmlElement",
+                "tag": "img",
+                "attributes": {
+                  "src": "{{...}}",
+                  "width": "200"
+                },
+                  "line": 11,
+                  "children": [
+                    {
+                      "type": "Call",
+                      "line": 11,
+                      "children": [
+                        {
+                          "type": "Name",
+                        "value": "url_for",
+                          "line": 11
+                        },
+                        {
+                          "type": "String",
+                        "value": "static",
+                          "line": 11
+                        },
+                        {
+                          "type": "KwArg:filename",
+                          "line": 11,
+                          "children": [
+                            {
+                              "type": "AttrAccess",
+                              "line": 11,
+                              "children": [
+                                {
+                                  "type": "Name",
+                                "value": "product",
+                                  "line": 11
+                                },
+                                {
+                                  "type": "Name",
+                                "value": "image",
+                                  "line": 11
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "HtmlElement",
+                "tag": "p",
+                  "line": 13,
+                  "children": [
+                    {
+                      "type": "Text",
+                    "value": "Price:",
+                      "line": 13
+                    },
+                    {
+                      "type": "JinjaExpr",
+                      "line": 13,
+                      "children": [
+                        {
+                          "type": "AttrAccess",
+                          "line": 13,
+                          "children": [
+                            {
+                              "type": "Name",
+                            "value": "product",
+                              "line": 13
+                            },
+                            {
+                              "type": "Name",
+                            "value": "price",
+                              "line": 13
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Text",
+                    "value": "$",
+                      "line": 13
+                    }
+                  ]
+                },
+                {
+                  "type": "HtmlElement",
+                "tag": "p",
+                  "line": 14,
+                  "children": [
+                    {
+                      "type": "JinjaExpr",
+                      "line": 14,
+                      "children": [
+                        {
+                          "type": "AttrAccess",
+                          "line": 14,
+                          "children": [
+                            {
+                              "type": "Name",
+                            "value": "product",
+                              "line": 14
+                            },
+                            {
+                              "type": "Name",
+                            "value": "details",
+                              "line": 14
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "HtmlElement",
+                "tag": "a",
+                "attributes": {
+                  "href": "/products"
+                },
+                  "line": 16,
+                  "children": [
+                    {
+                      "type": "Text",
+                    "value": "Back to products",
+                      "line": 16
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

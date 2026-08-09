@@ -1,0 +1,45 @@
+classDiagram
+    class AstNode {
+        <<abstract>>
+        #String nodeName
+        #int line
+        #List~AstNode~ children
+        +getNodeName() String
+        +getLine() int
+        +getChildren() List
+        +accept(visitor)*
+    }
+    class ExprNode { <<abstract>> }
+    class StmtNode { <<abstract>> }
+
+    AstNode <|-- ExprNode
+    AstNode <|-- StmtNode
+
+    ExprNode <|-- NameNode
+    ExprNode <|-- NumberNode
+    ExprNode <|-- StringNode
+    ExprNode <|-- BinOpNode
+    ExprNode <|-- CallNode
+    ExprNode <|-- AttrAccessNode
+    ExprNode <|-- JinjaExprNode
+
+    StmtNode <|-- AssignNode
+    StmtNode <|-- IfNode
+    StmtNode <|-- ForNode
+    StmtNode <|-- DefNode
+    StmtNode <|-- JinjaStmtNode
+
+    AstNode <|-- PythonFileNode
+    AstNode <|-- SuiteNode
+    AstNode <|-- ReturnNode
+    AstNode <|-- ImportNode
+    AstNode <|-- DecoratorNode
+    AstNode <|-- GlobalNode
+    AstNode <|-- ListNode
+    AstNode <|-- DictNode
+    AstNode <|-- TemplateNode
+    AstNode <|-- TextNode
+    AstNode <|-- HtmlElementNode
+    AstNode <|-- CssStylesheetNode
+    AstNode <|-- CssRuleNode
+    AstNode <|-- CssDeclarationNode

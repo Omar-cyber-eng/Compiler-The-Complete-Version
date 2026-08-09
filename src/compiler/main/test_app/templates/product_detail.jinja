@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product Details</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<h1>{{ product.name }}</h1>
+
+<img src="{{ url_for('static', filename=product.image) }}" width="200">
+
+<p>Price: {{ product.price }} $</p>
+<p>{{ product.details }}</p>
+
+<a href="/products">Back to products</a>
+
+</body>
+</html>

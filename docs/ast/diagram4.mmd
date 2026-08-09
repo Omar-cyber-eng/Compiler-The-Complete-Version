@@ -1,0 +1,13 @@
+flowchart LR
+    subgraph PY["شجرة Python AST"]
+        A["Assign: products"] --> L["List → Dict, Dict"]
+    end
+    subgraph GEN["CodeGenerator"]
+        E["extractFromPythonAST()"] --> CTX["Context:<br/>products = [Laptop, Phone]"]
+    end
+    subgraph JJ["شجرة Jinja AST"]
+        F["JinjaStmt: for product in products"]
+    end
+    L --> E
+    CTX --> F
+    F --> HTML["HTML نهائي:<br/>li Laptop - 1200$<br/>li Phone - 800$"]
