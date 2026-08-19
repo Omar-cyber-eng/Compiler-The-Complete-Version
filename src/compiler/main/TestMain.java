@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.io.IOException;
 import java.nio.file.Paths;
 
@@ -77,6 +78,7 @@ public class TestMain {
         System.out.println("=".repeat(8));
 
         int productCount = 0;
+        List<String> generatedFiles = new ArrayList<>();
         if (pythonAst != null && !templateAsts.isEmpty()) {
             CodeGenerator codeGen = new CodeGenerator();
 
@@ -108,6 +110,7 @@ public class TestMain {
                 String html = codeGen.generateForTemplate(templateAst, templateName, extra);
                 String outName = templateName.replace(".jinja", ".html");
                 codeGen.saveToFile(html, outputDir + outName);
+                generatedFiles.add(outName);
 
                 System.out.println("  Preview (first 300 chars):");
                 System.out.println("  " + html.substring(0, Math.min(300, html.length())));
@@ -147,15 +150,12 @@ public class TestMain {
                         jinjaDemo, "test_semantic_errors.jinja");
             }
 
-            System.out.println("Saving generation_log.txt...");
-            List<String> generatedFiles = List.of(
-                    "list_products.html",
-                    "add_product.html",
-                    "product_detail.html");
-            reporter.saveGenerationLog(generatedFiles, productCount);
-
             System.out.println("Copying support files...");
-            reporter.copyOutputFiles(basePath);
+            List<String> copiedFiles = reporter.copyOutputFiles(basePath);
+
+            // السجل يُكتب بعد النسخ ليعكس ما تم توليده ونسخه فعلاً
+            System.out.println("Saving generation_log.txt...");
+            reporter.saveGenerationLog(generatedFiles, productCount, copiedFiles);
 
             System.out.println("\n[OK] compiler_output/ ready!");
         } else {

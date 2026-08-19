@@ -46,6 +46,7 @@ public class WebServerJS {
     // ── المسارات ───────────────────────────────────────────────────────
     static final String BASE = "src/compiler/main/test_app/";
     static final String TEMPLATES = BASE + "templates/";
+    static final String GENERATED = BASE + "output/";
     static final String RESOURCES = BASE + "resources/";
 
     // ── CodeGenerator ──────────────────────────────────────────────────
@@ -55,6 +56,7 @@ public class WebServerJS {
     public static void main(String[] args) throws Exception {
 
         loadInitialData();
+        regenerateOutputFiles("startup");
 
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
 
@@ -161,6 +163,39 @@ public class WebServerJS {
             return html.substring(0, idx) + tag + "\n" + html.substring(idx);
         }
         return html + "\n" + tag;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // إعادة التوليد (regeneration)
+    //
+    // الجافا هي التي "تستمع" لتغيّر البيانات: أي إضافة أو حذف منتج تستدعي
+    // إعادة توليد صفحات output/ من قوالب Jinja + البيانات الحالية، فتبقى
+    // الملفات المولَّدة متزامنة مع البيانات (لا مجرّد ناتج التشغيل الأول).
+    // ═══════════════════════════════════════════════════════════════════
+    private static synchronized void regenerateOutputFiles(String reason) {
+        try {
+            Files.createDirectories(Paths.get(GENERATED));
+
+            writeGenerated("list_products.jinja", "list_products.html", null);
+            writeGenerated("add_product.jinja", "add_product.html", null);
+
+            if (!products.isEmpty()) {
+                Map<String, Object> extra = new HashMap<>();
+                extra.put("product", products.get(0));
+                writeGenerated("product_detail.jinja", "product_detail.html", extra);
+            }
+
+            System.out.println("[REGEN] output/ regenerated (" + reason
+                    + ") - products: " + products.size());
+        } catch (Exception e) {
+            System.err.println("[WARN] Regeneration failed: " + e.getMessage());
+        }
+    }
+
+    private static void writeGenerated(String templateName, String outName,
+            Map<String, Object> extra) throws Exception {
+        Files.writeString(Paths.get(GENERATED + outName),
+                generateHtml(templateName, extra));
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -347,6 +382,7 @@ public class WebServerJS {
 
                     products.add(newProduct);
                     System.out.println("[OK] Added product: " + name);
+                    regenerateOutputFiles("added product: " + name);
 
                     sendRedirect(ex, "/products");
                 }
@@ -390,7 +426,14 @@ public class WebServerJS {
             try {
                 String path = ex.getRequestURI().getPath();
                 String[] parts = path.split("/");
-                int pid = Integer.parseInt(parts[parts.length - 1]);
+
+                // معرّف غير رقمي (/delete/abc) كان يُنتج صفحة خطأ 500
+                Integer parsed = parseId(parts.length > 0 ? parts[parts.length - 1] : null);
+                if (parsed == null) {
+                    sendRedirect(ex, "/products");
+                    return;
+                }
+                int pid = parsed;
 
                 boolean removed = products.removeIf(p -> {
                     Object id = p.get("id");
@@ -403,6 +446,10 @@ public class WebServerJS {
                 System.out.println(removed
                         ? "[OK] Deleted product id=" + pid
                         : "[WARN] Product id=" + pid + " not found");
+
+                if (removed) {
+                    regenerateOutputFiles("deleted product id=" + pid);
+                }
 
                 sendRedirect(ex, "/products");
 
@@ -418,15 +465,20 @@ public class WebServerJS {
         public void handle(HttpExchange ex) throws IOException {
             try {
                 String uriPath = ex.getRequestURI().getPath();
-                String filePath = RESOURCES + uriPath.substring("/static/".length());
+                // نُطبّع المسار ونتأكد أنه لا يخرج من مجلد resources،
+                // وإلا استطاع طلب مثل /static/../app.py قراءة ملفات المشروع
+                Path baseDir = Paths.get(RESOURCES).toAbsolutePath().normalize();
+                Path target = baseDir
+                        .resolve(uriPath.substring("/static/".length()))
+                        .normalize();
 
-                File file = new File(filePath);
-                if (!file.exists()) {
+                if (!target.startsWith(baseDir) || !Files.isRegularFile(target)) {
                     ex.sendResponseHeaders(404, -1);
                     ex.getResponseBody().close();
                     return;
                 }
 
+                String filePath = target.toString();
                 String contentType = "text/plain";
                 if (filePath.endsWith(".css"))
                     contentType = "text/css";
@@ -437,7 +489,7 @@ public class WebServerJS {
                 if (filePath.endsWith(".js"))
                     contentType = "application/javascript";
 
-                byte[] bytes = Files.readAllBytes(file.toPath());
+                byte[] bytes = Files.readAllBytes(target);
                 ex.getResponseHeaders().set("Content-Type", contentType);
                 ex.sendResponseHeaders(200, bytes.length);
                 try (OutputStream os = ex.getResponseBody()) {
@@ -447,6 +499,19 @@ public class WebServerJS {
                 ex.sendResponseHeaders(500, -1);
                 ex.getResponseBody().close();
             }
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Helper: يقرأ معرّفاً رقمياً من مقطع URL (null إذا لم يكن رقماً)
+    // ═══════════════════════════════════════════════════════════════════
+    static Integer parseId(String raw) {
+        if (raw == null || raw.isEmpty())
+            return null;
+        try {
+            return Integer.valueOf(raw);
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 

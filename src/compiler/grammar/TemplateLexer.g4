@@ -113,4 +113,4 @@ JINJA_WS    : [ \t\r\n]+ -> skip;
 mode COMMENT_MODE;
 
 JINJA_COMMENT_END : '#}' -> popMode;
-JINJA_COMMENT_TEXT: .+?;
+JINJA_COMMENT_TEXT: (~[#] | '#' ~[}])+;

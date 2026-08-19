@@ -218,11 +218,31 @@ public class CodeGenerator {
 
         // ── JinjaExprNode: {{ expr }} ─────────────────────────────────────────
         if (node instanceof JinjaExprNode) {
-
+            List<AstNode> children = node.getChildren();
             Object val = evaluateJinjaExpr(
-                    node.getChildren().isEmpty() ? null : node.getChildren().get(0),
-                    context);
-            sb.append(val != null ? val.toString() : "");
+                    children.isEmpty() ? null : children.get(0), context);
+
+            // تطبيق الفلاتر بالترتيب: {{ name | trim | upper }}
+            boolean safe = false;
+            for (int i = 1; i < children.size(); i++) {
+                AstNode mark = children.get(i);
+                if (!(mark instanceof NameNode))
+                    continue;
+                String markName = ((NameNode) mark).getName();
+                if (!markName.startsWith("filter:"))
+                    continue;
+                String filterName = markName.substring("filter:".length());
+                if (filterName.equals("safe")) {
+                    safe = true; // | safe يمنع الترميز (escaping)
+                    continue;
+                }
+                val = applyFilter(filterName, val, filterArgs(mark, context));
+            }
+
+            String text = (val != null) ? val.toString() : "";
+            // نرمّز القيم المُحقَّنة (كما يفعل Jinja2 تلقائياً) حتى لا يفسد
+            // اسمُ منتجٍ يحتوي < أو & أو " صفحةَ HTML الناتجة
+            sb.append(safe ? text : escapeHtml(text));
             return;
         }
 
@@ -257,9 +277,12 @@ public class CodeGenerator {
             String attrName = attr.getKey();
             String attrVal = attr.getValue();
 
-            // إذا القيمة تحتوي {{dynamic}} - نبحث عن JinjaExpr في الأبناء
-            if (attrVal.contains("{{")) {
-                attrVal = resolveAttrValue(attrVal, node, context);
+            // إذا القيمة تحتوي تعابير Jinja نستبدل كل تعبير بقيمته،
+            // وإلا نكتفي بترميز علامات التنصيص كي تبقى الـ HTML سليمة
+            if (attrVal.contains(ATTR_PLACEHOLDER)) {
+                attrVal = resolveAttrValue(attrVal, node, attrName, context);
+            } else {
+                attrVal = attrVal.replace("\"", "&quot;");
             }
 
             sb.append(" ").append(attrName).append("=\"").append(attrVal).append("\"");
@@ -285,49 +308,47 @@ public class CodeGenerator {
         sb.append("</").append(tag).append(">\n");
     }
 
+    /** العلامة النائبة التي يضعها بانيُ الشجرة مكان كل تعبير Jinja داخل attribute */
+    private static final String ATTR_PLACEHOLDER = "{{...}}";
+
     /**
-     * يحل قيمة attribute التي تحتوي {{dynamic}}
+     * يحل قيمة attribute تحتوي تعابير Jinja.
+     *
+     * كل علامة نائبة تُستبدل بتعبيرها الخاص وبالترتيب، لأن الوسم قد يحتوي
+     * أكثر من attribute ديناميكي
+     * (مثل &lt;img src="{{ p.image }}" alt="{{ p.name }}"&gt;).
      */
     private String resolveAttrValue(String attrVal,
             HtmlElementNode node,
+            String attrName,
             Map<String, Object> context) {
 
-        // نبحث عن CallNode أو JinjaExpr في الأبناء
-        for (AstNode child : node.getChildren()) {
-            // ⭐ إذا كان CallNode مباشرة
-            if (child instanceof CallNode) {
-                Object val = evaluateJinjaCall((CallNode) child, context);
-                if (val != null && !val.toString().isEmpty()) {
-                    return attrVal.replace("{{dynamic}}", val.toString())
-                            .replace("{{...}}", val.toString());
-                }
-            }
-            // أو JinjaExprNode
-            else if (child instanceof JinjaExprNode) {
-                Object val = evaluateJinjaExpr(
-                        child.getChildren().isEmpty() ? null : child.getChildren().get(0),
-                        context);
-                if (val != null) {
-                    return attrVal.replace("{{dynamic}}", val.toString())
-                            .replace("{{...}}", val.toString());
-                }
-            }
-            // ⭐ أو AttrAccessNode مباشرة (مثل product.id)
-            else if (child instanceof AttrAccessNode) {
-                Object val = evaluateJinjaExpr(child, context);
-                if (val != null) {
-                    return attrVal.replace("{{dynamic}}", val.toString())
-                            .replace("{{...}}", val.toString());
-                }
-            }
-        }
+        List<AstNode> exprs = node.getAttributeExprs(attrName);
 
-        return attrVal.replace("{{...}}", "#");
+        StringBuilder out = new StringBuilder();
+        int exprIndex = 0;
+        int from = 0;
+        int at;
+        while ((at = attrVal.indexOf(ATTR_PLACEHOLDER, from)) >= 0) {
+            out.append(attrVal, from, at);
+
+            String value = "#"; // تعبير غير معروف: قيمة محيّدة
+            if (exprIndex < exprs.size()) {
+                Object val = evaluateJinjaExpr(exprs.get(exprIndex), context);
+                value = (val != null) ? val.toString() : "";
+            }
+            out.append(escapeHtml(value));
+
+            exprIndex++;
+            from = at + ATTR_PLACEHOLDER.length();
+        }
+        out.append(attrVal.substring(from));
+
+        return out.toString();
     }
 
     // ── Jinja Statement ───────────────────────────────────────────────────────
 
-    @SuppressWarnings("unchecked")
     private void evaluateJinjaStmt(AstNode node,
             Map<String, Object> context,
             StringBuilder sb) {
@@ -335,43 +356,146 @@ public class CodeGenerator {
         if (children.isEmpty())
             return;
 
-        AstNode first = children.get(0);
+        // نوع التعليمة مخزَّن في العقدة نفسها (for / if / elif / else)،
+        // ولا يجوز استنتاجه من شكل الأبناء: {% if products %} أول أبنائها
+        // اسم أيضاً، فكانت تُعالَج خطأً كحلقة for ولا تُولَّد أبداً
+        String kind = (node instanceof JinjaStmtNode)
+                ? ((JinjaStmtNode) node).getKind()
+                : "";
 
-        // ── FOR loop ──────────────────────────────────────────────────────────
-        // بنية: [NameNode(var), expr(iterable), content...]
-        if (first instanceof NameNode && children.size() >= 2) {
-            String loopVar = ((NameNode) first).getName();
-            AstNode iterable = children.get(1);
+        if ("for".equals(kind)) {
+            evaluateForStmt(children, context, sb);
+            return;
+        }
 
-            Object iterObj = evaluateJinjaExpr(iterable, context);
+        if ("if".equals(kind) || "elif".equals(kind)) {
+            evaluateIfStmt(children, context, sb);
+            return;
+        }
 
-            if (iterObj instanceof List) {
-                List<Object> items = (List<Object>) iterObj;
-                for (Object item : items) {
-                    // نبني context جديد للـ iteration
-                    Map<String, Object> loopContext = new HashMap<>(context);
-                    loopContext.put(loopVar, item);
-
-                    // نولّد المحتوى لكل عنصر
-                    for (int i = 2; i < children.size(); i++) {
-                        evaluateNode(children.get(i), loopContext, sb);
-                    }
-                }
+        if ("else".equals(kind)) {
+            for (AstNode child : children) {
+                evaluateNode(child, context, sb);
             }
             return;
         }
 
-        // ── IF statement ──────────────────────────────────────────────────────
-        // بنية: [condition, content...]
-        Object condVal = evaluateJinjaExpr(first, context);
-        if (isTruthy(condVal)) {
-            for (int i = 1; i < children.size(); i++) {
-                AstNode child = children.get(i);
-                // تجاهل elif/else nodes
-                if (!(child instanceof JinjaStmtNode)) {
-                    evaluateNode(child, context, sb);
+        // نوع غير معروف: احتياطياً نولّد الأبناء
+        for (AstNode child : children) {
+            evaluateNode(child, context, sb);
+        }
+    }
+
+    /** {% for var in iterable %} ... {% endfor %} */
+    private void evaluateForStmt(List<AstNode> children,
+            Map<String, Object> context,
+            StringBuilder sb) {
+        if (children.size() < 2 || !(children.get(0) instanceof NameNode))
+            return;
+
+        String loopVar = ((NameNode) children.get(0)).getName();
+        Object iterObj = evaluateJinjaExpr(children.get(1), context);
+
+        List<Object> items = toIterableList(iterObj);
+        int total = items.size();
+
+        for (int index = 0; index < total; index++) {
+            // نبني context جديد للـ iteration
+            Map<String, Object> loopContext = new HashMap<>(context);
+            loopContext.put(loopVar, items.get(index));
+            loopContext.put("loop", loopInfo(index, total));
+
+            // نولّد المحتوى لكل عنصر
+            for (int i = 2; i < children.size(); i++) {
+                evaluateNode(children.get(i), loopContext, sb);
+            }
+        }
+    }
+
+    /** يحوّل ناتج التقييم إلى قائمة قابلة للمرور (list / dict / نص) */
+    private List<Object> toIterableList(Object iterObj) {
+        if (iterObj instanceof List) {
+            return new ArrayList<>((List<?>) iterObj);
+        }
+        if (iterObj instanceof Map) {
+            // Jinja يمرّ على مفاتيح القاموس
+            return new ArrayList<>(((Map<?, ?>) iterObj).keySet());
+        }
+        if (iterObj instanceof Iterable) {
+            List<Object> list = new ArrayList<>();
+            for (Object o : (Iterable<?>) iterObj)
+                list.add(o);
+            return list;
+        }
+        return Collections.emptyList();
+    }
+
+    /** متغيّر loop المتاح داخل الحلقات: loop.index / loop.first / ... */
+    private Map<String, Object> loopInfo(int index, int total) {
+        Map<String, Object> loop = new LinkedHashMap<>();
+        loop.put("index", index + 1);
+        loop.put("index0", index);
+        loop.put("revindex", total - index);
+        loop.put("revindex0", total - index - 1);
+        loop.put("first", index == 0);
+        loop.put("last", index == total - 1);
+        loop.put("length", total);
+        return loop;
+    }
+
+    /**
+     * {% if %} / {% elif %} / {% else %}
+     *
+     * الأبناء: [الشرط, محتوى الجسم..., عقد elif/else].
+     * نميّز عقد elif/else بنوعها (kind) لا بصنفها، لأن الجسم نفسه قد يحتوي
+     * تعليمات Jinja متداخلة يجب توليدها.
+     */
+    private void evaluateIfStmt(List<AstNode> children,
+            Map<String, Object> context,
+            StringBuilder sb) {
+
+        List<AstNode> body = new ArrayList<>();
+        List<JinjaStmtNode> clauses = new ArrayList<>();
+
+        for (int i = 1; i < children.size(); i++) {
+            AstNode child = children.get(i);
+            if (child instanceof JinjaStmtNode) {
+                String k = ((JinjaStmtNode) child).getKind();
+                if ("elif".equals(k) || "else".equals(k)) {
+                    clauses.add((JinjaStmtNode) child);
+                    continue;
                 }
             }
+            body.add(child);
+        }
+
+        if (isTruthy(evaluateJinjaExpr(children.get(0), context))) {
+            for (AstNode child : body) {
+                evaluateNode(child, context, sb);
+            }
+            return;
+        }
+
+        // الشرط غير محقّق: نجرّب elif بالترتيب ثم else
+        for (JinjaStmtNode clause : clauses) {
+            List<AstNode> cc = clause.getChildren();
+
+            if ("elif".equals(clause.getKind())) {
+                if (cc.isEmpty())
+                    continue;
+                if (!isTruthy(evaluateJinjaExpr(cc.get(0), context)))
+                    continue;
+                for (int i = 1; i < cc.size(); i++) {
+                    evaluateNode(cc.get(i), context, sb);
+                }
+                return;
+            }
+
+            // else
+            for (AstNode child : cc) {
+                evaluateNode(child, context, sb);
+            }
+            return;
         }
     }
 
@@ -400,9 +524,9 @@ public class CodeGenerator {
             return ((StringNode) node).getValue();
         }
 
-        // Number literal
+        // Number literal → قيمة رقمية (لتعمل الحسابات والفلاتر عليها)
         if (node instanceof NumberNode) {
-            return ((NumberNode) node).getValue();
+            return parseNumber(((NumberNode) node).getValue());
         }
 
         // AttrAccess: product.name
@@ -429,8 +553,16 @@ public class CodeGenerator {
             return evaluateJinjaBinOp((BinOpNode) node, context);
         }
 
-        // Subscript: product["id"]
+        // Not: {% if not products %}
         String nodeName = node.getNodeName();
+        if (nodeName != null && nodeName.equals("Not")) {
+            List<AstNode> children = node.getChildren();
+            if (children.isEmpty())
+                return true;
+            return !isTruthy(evaluateJinjaExpr(children.get(0), context));
+        }
+
+        // Subscript: product["id"]
         if (nodeName != null && nodeName.equals("Subscript")) {
             List<AstNode> children = node.getChildren();
             if (children.size() < 2)
@@ -471,6 +603,10 @@ public class CodeGenerator {
                 return compareNumbers(left, right) >= 0;
             case "<=":
                 return compareNumbers(left, right) <= 0;
+            case "and":
+                return isTruthy(left) && isTruthy(right);
+            case "or":
+                return isTruthy(left) || isTruthy(right);
             case "+":
                 if (left instanceof Integer && right instanceof Integer)
                     return (Integer) left + (Integer) right;
@@ -548,13 +684,193 @@ public class CodeGenerator {
             return false;
         if (val instanceof Boolean)
             return (Boolean) val;
-        if (val instanceof Integer)
-            return (Integer) val != 0;
+        if (val instanceof Number)
+            return ((Number) val).doubleValue() != 0;
         if (val instanceof String)
             return !((String) val).isEmpty();
         if (val instanceof List)
             return !((List<?>) val).isEmpty();
+        if (val instanceof Map)
+            return !((Map<?, ?>) val).isEmpty();
         return true;
+    }
+
+    /** يحوّل نصاً رقمياً إلى Integer أو Double (أو يعيده كما هو إذا فشل) */
+    private Object parseNumber(String raw) {
+        if (raw == null)
+            return null;
+        try {
+            return raw.contains(".")
+                    ? (Object) Double.valueOf(raw)
+                    : (Object) Integer.valueOf(raw);
+        } catch (NumberFormatException e) {
+            return raw;
+        }
+    }
+
+    // ── الفلاتر: {{ value | filter }} ─────────────────────────────────────────
+
+    /** يقيّم وسائط الفلتر المخزَّنة كأبناء لعلامة الفلتر */
+    private List<Object> filterArgs(AstNode filterMark, Map<String, Object> context) {
+        List<Object> args = new ArrayList<>();
+        for (AstNode arg : filterMark.getChildren()) {
+            args.add(evaluateJinjaExpr(arg, context));
+        }
+        return args;
+    }
+
+    /**
+     * يطبّق فلتر Jinja على قيمة.
+     * الفلاتر غير المعروفة تُترك القيمة كما هي (المحلل الدلالي هو من يبلّغ عنها).
+     */
+    private Object applyFilter(String name, Object value, List<Object> args) {
+        String text = (value != null) ? String.valueOf(value) : "";
+        Object arg0 = args.isEmpty() ? null : args.get(0);
+
+        switch (name) {
+            case "upper":
+                return text.toUpperCase();
+            case "lower":
+                return text.toLowerCase();
+            case "capitalize":
+                return text.isEmpty()
+                        ? text
+                        : Character.toUpperCase(text.charAt(0)) + text.substring(1).toLowerCase();
+            case "title": {
+                StringBuilder out = new StringBuilder();
+                boolean startOfWord = true;
+                for (char c : text.toCharArray()) {
+                    out.append(startOfWord ? Character.toUpperCase(c) : Character.toLowerCase(c));
+                    startOfWord = !Character.isLetterOrDigit(c);
+                }
+                return out.toString();
+            }
+            case "trim":
+                return text.trim();
+            case "length":
+            case "count":
+                if (value instanceof List)
+                    return ((List<?>) value).size();
+                if (value instanceof Map)
+                    return ((Map<?, ?>) value).size();
+                return text.length();
+            case "default":
+                return isTruthy(value) ? value : (arg0 != null ? arg0 : "");
+            case "int": {
+                Object n = toNumber(value);
+                return (n != null) ? ((Number) n).intValue() : 0;
+            }
+            case "float": {
+                Object n = toNumber(value);
+                return (n != null) ? ((Number) n).doubleValue() : 0.0d;
+            }
+            case "round": {
+                Object n = toNumber(value);
+                if (n == null)
+                    return value;
+                int digits = (arg0 instanceof Number) ? ((Number) arg0).intValue() : 0;
+                double factor = Math.pow(10, digits);
+                double rounded = Math.round(((Number) n).doubleValue() * factor) / factor;
+                return (digits == 0) ? (Object) (long) rounded : (Object) rounded;
+            }
+            case "abs": {
+                Object n = toNumber(value);
+                return (n != null) ? Math.abs(((Number) n).doubleValue()) : value;
+            }
+            case "sum": {
+                double total = 0;
+                if (value instanceof List) {
+                    for (Object item : (List<?>) value) {
+                        Object n = toNumber(item);
+                        if (n != null)
+                            total += ((Number) n).doubleValue();
+                    }
+                }
+                return (total == Math.rint(total)) ? (Object) (long) total : (Object) total;
+            }
+            case "string":
+                return text;
+            case "escape":
+            case "e":
+                return escapeHtml(text);
+            case "striptags":
+                return text.replaceAll("<[^>]*>", "");
+            case "replace":
+                if (args.size() >= 2) {
+                    return text.replace(String.valueOf(args.get(0)),
+                            String.valueOf(args.get(1)));
+                }
+                return text;
+            case "truncate": {
+                int limit = (arg0 instanceof Number) ? ((Number) arg0).intValue() : 255;
+                return (text.length() <= limit) ? text : text.substring(0, limit) + "...";
+            }
+            case "join": {
+                String sep = (arg0 != null) ? String.valueOf(arg0) : "";
+                if (!(value instanceof List))
+                    return text;
+                StringBuilder out = new StringBuilder();
+                List<?> items = (List<?>) value;
+                for (int i = 0; i < items.size(); i++) {
+                    if (i > 0)
+                        out.append(sep);
+                    out.append(String.valueOf(items.get(i)));
+                }
+                return out.toString();
+            }
+            case "first":
+                if (value instanceof List && !((List<?>) value).isEmpty())
+                    return ((List<?>) value).get(0);
+                return text.isEmpty() ? "" : text.substring(0, 1);
+            case "last":
+                if (value instanceof List && !((List<?>) value).isEmpty()) {
+                    List<?> items = (List<?>) value;
+                    return items.get(items.size() - 1);
+                }
+                return text.isEmpty() ? "" : text.substring(text.length() - 1);
+            case "reverse": {
+                if (value instanceof List) {
+                    List<Object> items = new ArrayList<>((List<?>) value);
+                    Collections.reverse(items);
+                    return items;
+                }
+                return new StringBuilder(text).reverse().toString();
+            }
+            case "list":
+                return (value instanceof List) ? value : toIterableList(value);
+            case "sort": {
+                if (!(value instanceof List))
+                    return value;
+                List<Object> items = new ArrayList<>((List<?>) value);
+                items.sort(Comparator.comparing(o -> String.valueOf(o)));
+                return items;
+            }
+            default:
+                return value; // فلتر غير مدعوم: القيمة كما هي
+        }
+    }
+
+    /** يحوّل قيمة إلى Number إن أمكن، وإلا null */
+    private Object toNumber(Object value) {
+        if (value instanceof Number)
+            return value;
+        try {
+            String s = String.valueOf(value);
+            return s.contains(".") ? (Object) Double.valueOf(s) : (Object) Integer.valueOf(s);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** ترميز محارف HTML الخاصة (كالسلوك الافتراضي في Jinja2) */
+    private String escapeHtml(String text) {
+        if (text == null || text.isEmpty())
+            return "";
+        return text.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
 
     // =========================================================================
