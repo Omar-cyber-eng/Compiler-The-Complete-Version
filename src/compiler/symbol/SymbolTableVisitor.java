@@ -13,6 +13,10 @@ public class SymbolTableVisitor implements AstVisitor<Void> {
     private Scope currentScope;
     private Scope globalScope;
 
+    // الأسماء المعلَنة global داخل الدالة الحالية: الإسناد إليها يعدّل
+    // المتغيّر العام ولا يُنشئ متغيّراً محلياً جديداً
+    private java.util.Set<String> currentGlobalNames = new java.util.HashSet<>();
+
     public SymbolTableVisitor() {
         globalScope = new Scope("global", null);
         currentScope = globalScope;
@@ -84,10 +88,15 @@ public class SymbolTableVisitor implements AstVisitor<Void> {
             currentScope.define(paramSymbol);
         }
 
+        // إعلانات global خاصة بكل دالة
+        java.util.Set<String> previousGlobals = currentGlobalNames;
+        currentGlobalNames = new java.util.HashSet<>();
+
         // زيارة جسم الدالة
         visitChildren(node);
 
         // العودة للـ scope السابق
+        currentGlobalNames = previousGlobals;
         currentScope = previousScope;
         return null;
     }
@@ -98,8 +107,12 @@ public class SymbolTableVisitor implements AstVisitor<Void> {
             AstNode target = node.getChildren().get(0);
             if (target instanceof NameNode) {
                 String varName = ((NameNode) target).getName();
-                Symbol varSymbol = new Symbol(varName, "variable", node.getLine());
-                currentScope.define(varSymbol);
+                // الإسناد إلى اسم معلَن global يعدّل المتغيّر العام نفسه،
+                // فلا نُعرّف نسخة محلية مضلِّلة داخل الدالة
+                if (!currentGlobalNames.contains(varName)) {
+                    Symbol varSymbol = new Symbol(varName, "variable", node.getLine());
+                    currentScope.define(varSymbol);
+                }
             }
             if (node.getChildren().size() > 1) {
                 node.getChildren().get(1).accept(this);
@@ -132,12 +145,21 @@ public class SymbolTableVisitor implements AstVisitor<Void> {
 
     @Override
     public Void visitGlobal(GlobalNode node) {
-        // تسجيل المتغيرات العالمية
+        // تسجيل إعلان global: لا نطمس تعريف المتغيّر الأصلي في النطاق العام
+        // (كان يستبدل سطر تعريفه بسطر تعليمة global)، ونسجّل مرجعاً في الدالة
         for (AstNode child : node.getChildren()) {
             if (child instanceof NameNode) {
                 String varName = ((NameNode) child).getName();
-                Symbol globalVar = new Symbol(varName, "global_variable", node.getLine());
-                globalScope.define(globalVar);
+                currentGlobalNames.add(varName);
+
+                if (globalScope.resolveLocal(varName) == null) {
+                    globalScope.define(
+                            new Symbol(varName, "global_variable", node.getLine()));
+                }
+                if (currentScope != globalScope) {
+                    currentScope.define(
+                            new Symbol(varName, "global_ref", node.getLine()));
+                }
             }
         }
         return null;

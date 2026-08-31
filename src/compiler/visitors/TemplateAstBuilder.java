@@ -108,8 +108,10 @@ public class TemplateAstBuilder extends TemplateParserBaseVisitor<AstNode> {
             String attrValueStr = extractAttrValue(attrValue);
             node.addAttribute(attrName, attrValueStr);
 
-            // ⭐ أضف الـ JinjaExpr nodes كأطفال
-            extractAndAddJinjaExprs(node, attrValue);
+            // ⭐ أضف الـ JinjaExpr nodes كأطفال (للطباعة والتحليل الدلالي)،
+            // ونسجّلها أيضاً باسم الـ attribute حتى يستبدل المولّد كل تعبير
+            // في موضعه الصحيح عندما يحتوي الوسم أكثر من attribute ديناميكي
+            extractAndAddJinjaExprs(node, attrName, attrValue);
 
         } else if (ctx instanceof BooleanAttributeContext) {
             BooleanAttributeContext b = (BooleanAttributeContext) ctx;
@@ -151,7 +153,8 @@ public class TemplateAstBuilder extends TemplateParserBaseVisitor<AstNode> {
     /**
      * يستخرج JinjaExpr nodes من attr_value ويضيفها كأطفال للـ node
      */
-    private void extractAndAddJinjaExprs(HtmlElementNode node, Attr_valueContext ctx) {
+    private void extractAndAddJinjaExprs(HtmlElementNode node, String attrName,
+            Attr_valueContext ctx) {
         if (ctx instanceof DynamicAttrValueDQContext) {
             for (Attr_part_dqContext part : ((DynamicAttrValueDQContext) ctx).attr_part_dq()) {
                 if (part instanceof AttrJinjaPartDQContext) {
@@ -159,6 +162,7 @@ public class TemplateAstBuilder extends TemplateParserBaseVisitor<AstNode> {
                     AstNode expr = visit(jinjaPart.jinja_expr());
                     if (expr != null) {
                         node.addChild(expr);
+                        node.addAttributeExpr(attrName, expr);
                     }
                 }
             }
@@ -169,6 +173,7 @@ public class TemplateAstBuilder extends TemplateParserBaseVisitor<AstNode> {
                     AstNode expr = visit(jinjaPart.jinja_expr());
                     if (expr != null) {
                         node.addChild(expr);
+                        node.addAttributeExpr(attrName, expr);
                     }
                 }
             }
@@ -181,9 +186,18 @@ public class TemplateAstBuilder extends TemplateParserBaseVisitor<AstNode> {
 
     @Override
     public AstNode visitText_content(Text_contentContext ctx) {
-        String text = ctx.HTML_TEXT().getText().trim();
-        if (text.isEmpty())
-            return null;
+        String raw = ctx.HTML_TEXT().getText();
+        if (raw.trim().isEmpty()) {
+            // فراغات فقط: إن كانت داخل السطر فهي فاصلة حقيقية بين عنصرين
+            // فنُبقي فراغاً واحداً، وإن كانت سطراً جديداً/إزاحة فنتجاهلها
+            if (raw.indexOf('\n') >= 0 || raw.indexOf('\r') >= 0)
+                return null;
+            return new TextNode(" ", ctx.getStart().getLine());
+        }
+        // نضغط سلاسل الفراغات/الأسطر إلى فراغ واحد بدل حذفها كلياً،
+        // كي لا تُفقد المسافات المحيطة بتعابير Jinja
+        // (مثل "Price: {{ p.price }} $" التي كانت تُولَّد "Price:1200$")
+        String text = raw.replaceAll("[ \t\r\n]+", " ");
         return new TextNode(text, ctx.getStart().getLine());
     }
 
@@ -201,8 +215,18 @@ public class TemplateAstBuilder extends TemplateParserBaseVisitor<AstNode> {
             node.addChild(expr);
 
         for (FilterContext f : ctx.filter()) {
-            node.addChild(new NameNode("filter:" + f.JINJA_NAME().getText(),
-                    f.getStart().getLine()));
+            // علامة الفلتر: NameNode باسم "filter:xxx"، ووسائط الفلتر (إن وُجدت)
+            // تُخزَّن كأبناء لهذه العلامة ليستخدمها المولّد (مثل | default('N/A'))
+            NameNode filterMark = new NameNode("filter:" + f.JINJA_NAME().getText(),
+                    f.getStart().getLine());
+            if (f.jinja_args() != null) {
+                for (Jinja_argContext arg : f.jinja_args().jinja_arg()) {
+                    AstNode argNode = visit(arg);
+                    if (argNode != null)
+                        filterMark.addChild(argNode);
+                }
+            }
+            node.addChild(filterMark);
         }
         return node;
     }

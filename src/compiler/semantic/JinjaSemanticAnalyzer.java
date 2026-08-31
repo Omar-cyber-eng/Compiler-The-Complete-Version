@@ -1,8 +1,9 @@
 package compiler.semantic;
 
 import compiler.ast.core.AstNode;
-// import compiler.ast.nodes.*;
-// import compiler.ast.nodes.html.HtmlElementNode;
+import compiler.ast.nodes.TemplateNode;
+import compiler.ast.nodes.TextNode;
+import compiler.ast.nodes.html.HtmlElementNode;
 import compiler.ast.nodes.jinja.*;
 import compiler.ast.nodes.python.*;
 
@@ -179,10 +180,27 @@ public class JinjaSemanticAnalyzer {
             return;
         }
 
-        // TemplateNode / HtmlElementNode / TextNode / غيرها: ندخل على الأبناء
+        // TemplateNode / HtmlElementNode / TextNode / غيرها: ندخل على الأبناء.
+        // ملاحظة: تعابير Jinja الواردة داخل قيم الـ attributes تُخزَّن كأبناء
+        // مباشرة للوسم (Name / AttrAccess / Call ...) دون غلاف JinjaExprNode،
+        // فنمرّرها إلى فاحص التعابير كي لا تفلت من التحليل الدلالي
+        // مثل: <a href="/products/{{ ghost.id }}">
         for (AstNode child : node.getChildren()) {
-            walk(child);
+            if (isStructuralNode(child)) {
+                walk(child);
+            } else {
+                checkExpr(child);
+            }
         }
+    }
+
+    /** هل العقدة جزء من بنية القالب (لا تعبير Jinja)؟ */
+    private boolean isStructuralNode(AstNode node) {
+        return node instanceof TemplateNode
+                || node instanceof TextNode
+                || node instanceof HtmlElementNode
+                || node instanceof JinjaStmtNode
+                || node instanceof JinjaExprNode;
     }
 
     private void walkStmt(JinjaStmtNode node) {
@@ -252,6 +270,10 @@ public class JinjaSemanticAnalyzer {
                 if (!KNOWN_FILTERS.contains(filter)) {
                     addError(JinjaSemanticError.ErrorType.UNKNOWN_FILTER,
                             "Unknown filter '" + filter + "'", child.getLine());
+                }
+                // وسائط الفلتر (مثل | default(fallback)) تُفحص كتعابير أيضاً
+                for (AstNode arg : child.getChildren()) {
+                    checkExpr(arg);
                 }
             } else {
                 checkExpr(child);

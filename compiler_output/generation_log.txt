@@ -1,7 +1,7 @@
 ==================================================
     CODE GENERATION LOG
 ==================================================
-Date      : 2026-08-09 07:12:57
+Date      : 2026-08-19 06:03:46
 --------------------------------------------------
 
 Step [1] - Extract data from Python AST
@@ -13,8 +13,9 @@ Step [2] - Generate HTML from Jinja templates
   [3] product_detail.html → OK ✅
 
 Step [3] - Copy support files
-  [1] app.py    → output/ ✅
+  [1] app.py → output/ ✅
   [2] style.css → output/ ✅
+  [3] script.js → output/ ✅
 
 --------------------------------------------------
 Total files generated : 3

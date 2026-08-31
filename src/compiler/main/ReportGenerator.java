@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -164,7 +165,8 @@ public class ReportGenerator {
 
     // ── 4. generation_log.txt ─────────────────────────────────────────
     public void saveGenerationLog(List<String> generatedFiles,
-            int productCount) {
+            int productCount,
+            List<String> copiedFiles) {
         StringBuilder sb = new StringBuilder();
         sb.append("=".repeat(50)).append("\n");
         sb.append("    CODE GENERATION LOG\n");
@@ -183,9 +185,16 @@ public class ReportGenerator {
                     .append(generatedFiles.get(i)).append(" → OK ✅\n");
         }
 
+        // الملفات المرافقة كما نُسخت فعلاً (لا قائمة ثابتة)
         sb.append("\nStep [3] - Copy support files\n");
-        sb.append("  [1] app.py    → output/ ✅\n");
-        sb.append("  [2] style.css → output/ ✅\n");
+        if (copiedFiles == null || copiedFiles.isEmpty()) {
+            sb.append("  (none)\n");
+        } else {
+            for (int i = 0; i < copiedFiles.size(); i++) {
+                sb.append("  [").append(i + 1).append("] ")
+                        .append(copiedFiles.get(i)).append(" → output/ ✅\n");
+            }
+        }
 
         sb.append("\n").append("-".repeat(50)).append("\n");
         sb.append("Total files generated : ")
@@ -214,7 +223,8 @@ public class ReportGenerator {
     }
 
     // أضف هذه الدالة
-    public void copyOutputFiles(String basePath) {
+    public List<String> copyOutputFiles(String basePath) {
+        List<String> copied = new ArrayList<>();
         try {
             String outputDir = basePath + "output/";
             new File(outputDir).mkdirs();
@@ -224,6 +234,7 @@ public class ReportGenerator {
                     Paths.get(basePath + "app.py"),
                     Paths.get(outputDir + "app.py"),
                     StandardCopyOption.REPLACE_EXISTING);
+            copied.add("app.py");
             System.out.println("  [OK] Copied: app.py -> output/");
 
             // نسخ style.css
@@ -231,6 +242,7 @@ public class ReportGenerator {
                     Paths.get(basePath + "resources/css/style.css"),
                     Paths.get(outputDir + "style.css"),
                     StandardCopyOption.REPLACE_EXISTING);
+            copied.add("style.css");
             System.out.println("  [OK] Copied: style.css -> output/");
 
             // نسخ script.js إن وُجد (ملف مرافق اختياري حسب ملاحظة المعيدة)
@@ -239,11 +251,13 @@ public class ReportGenerator {
                 Files.copy(scriptSrc,
                         Paths.get(outputDir + "script.js"),
                         StandardCopyOption.REPLACE_EXISTING);
+                copied.add("script.js");
                 System.out.println("  [OK] Copied: script.js -> output/");
             }
 
         } catch (IOException e) {
             System.err.println("  [ERROR] Copy failed: " + e.getMessage());
         }
+        return copied;
     }
 }

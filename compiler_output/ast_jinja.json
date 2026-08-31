@@ -1,6 +1,6 @@
 {
   "type": "JinjaTemplates",
-  "generated": "2026-08-09 07:12:57",
+  "generated": "2026-08-19 06:03:46",
   "templates": {
     "list_products.jinja": {
       "type": "Template",
@@ -247,8 +247,8 @@
                               "type": "HtmlElement",
                             "tag": "form",
                             "attributes": {
-                              "method": "post",
                               "action": "/delete/{{...}}",
+                              "method": "post",
                               "style": "display:inline;"
                             },
                               "line": 21,
@@ -425,8 +425,8 @@
                       "type": "HtmlElement",
                     "tag": "input",
                     "attributes": {
-                      "name": "name",
-                      "type": "text"
+                      "type": "text",
+                      "name": "name"
                     },
                       "line": 13
                     },
@@ -451,8 +451,8 @@
                       "type": "HtmlElement",
                     "tag": "input",
                     "attributes": {
-                      "name": "price",
-                      "type": "number"
+                      "type": "number",
+                      "name": "price"
                     },
                       "line": 16
                     },
